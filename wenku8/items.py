@@ -6,7 +6,14 @@
 import scrapy
 
 
-class Wenku8Item(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class BookItem(scrapy.Item):
+    query_id: int = scrapy.Field()
+    title: str = scrapy.Field()
+    writer: str = scrapy.Field()
+    description: str = scrapy.Field()
+    download_url: str = scrapy.Field()
+    last_chapter: str = scrapy.Field()
+    last_updated: str = scrapy.Field()
+    words: int = scrapy.Field()
+    status: str = scrapy.Field()
+    tags: list[str] = scrapy.Field()
