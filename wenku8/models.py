@@ -28,6 +28,6 @@ class Tag(SQLModel, table=True):
     books: list[Book] = Relationship(back_populates="tags", link_model=BookTagLink)
 
 
-__engine_url = r"sqlite:///./wenku8/data.db"
+__engine_url = r"sqlite:///./data.db"
 engine = create_engine(__engine_url)
 SQLModel.metadata.create_all(engine)
