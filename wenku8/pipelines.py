@@ -37,7 +37,6 @@ class Database:
                 title=item['title'],
                 writer=item['writer'],
                 description=item['description'],
-                download_url=item['download_url'],
                 last_chapter=item['last_chapter'],
                 last_updated=item['last_updated'],
                 words=item['words'],

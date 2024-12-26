@@ -11,7 +11,6 @@ class BookItem(scrapy.Item):
     title: str = scrapy.Field()
     writer: str = scrapy.Field()
     description: str = scrapy.Field()
-    download_url: str = scrapy.Field()
     last_chapter: str = scrapy.Field()
     last_updated: str = scrapy.Field()
     words: int = scrapy.Field()

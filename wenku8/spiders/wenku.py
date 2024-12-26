@@ -1,6 +1,5 @@
 import logging
 import re
-from urllib.parse import urlencode
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import select, Session
 
@@ -24,7 +23,7 @@ class WenkuSpider(scrapy.Spider):
             except NoResultFound:
                 self.log("No Book in the tabel", logging.INFO)
                 last_query_id = 1
-        self.log("start from "+last_query_id, logging.WARNING)
+        self.log(f"start from {last_query_id}", logging.WARNING)
         for index in range(last_query_id, self.max_index + 1):
             request = scrapy.Request(
                 root_url + str(index) + ".htm",
@@ -37,14 +36,12 @@ class WenkuSpider(scrapy.Spider):
     def parse(self, response, query_id: int):
         res = self.re_first(response)
         title = res('//table[1]//span/b/text()')
-        download_url = f"https://dl1.wenku8.com/down.php?type=txt&id={query_id}&"+urlencode({"fname":title}, encoding="gbk")
         writer = res(
             '//table[1]//tr[2]/td[2]/text()',
             r"小说作者：((.*){1,})",
         )
         normal_desc = response.xpath('//div[@id="content"]//table[2]//tr/td[2]/span[6]/text()').extract_first()
         if normal_desc is None:
-            download_url = None
             description = response.xpath("//div[@id='content']//table[2]//tr/td[2]/span[4]/text()").extract_first()
         else:
             description = normal_desc
@@ -74,7 +71,6 @@ class WenkuSpider(scrapy.Spider):
             title=title,
             writer=writer,
             description=description,
-            download_url=download_url,
             last_chapter=last_chapter,
             last_updated=last_updated,
             words=words,

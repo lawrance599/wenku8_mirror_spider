@@ -8,6 +8,7 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import logging
 
+DOWNLOAD_PATH = 'E:/download/spider/'
 LOG_LEVEL = logging.WARNING
 BOT_NAME = "wenku8"
 

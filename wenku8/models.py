@@ -14,7 +14,6 @@ class Book(SQLModel, table=True):
     title: Optional[str] = Field(default=None, unique=True)
     writer: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
-    download_url: Optional[str] = Field(default="无版权")
     last_chapter: Optional[str] = Field(default="无版权")
     last_updated: Optional[str] = Field(default="无版权")
     words: Optional[int] = Field(default=0)
@@ -28,6 +27,6 @@ class Tag(SQLModel, table=True):
     books: list[Book] = Relationship(back_populates="tags", link_model=BookTagLink)
 
 
-__engine_url = r"sqlite:///./data.db"
+__engine_url = r"mysql+pymysql://yixin:13767631251Fan!@122.51.138.48:3306/wenku8"
 engine = create_engine(__engine_url)
 SQLModel.metadata.create_all(engine)
