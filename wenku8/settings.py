@@ -10,12 +10,15 @@ import logging
 import os
 from datetime import datetime
 
-LOG_LEVEL = logging.INFO
 BOT_NAME = "wenku8"
+
+# log settings
 today = datetime.now()
+LOG_LEVEL = logging.INFO
 LOG_FILE = f"./log/{today.year}.{today.month}.{today.day}.log"
-if not os.path.exists(LOG_FILE):
-    os.makedirs(LOG_FILE)
+if not os.path.exists("./log"):
+    os.mkdir("./log")
+
 SPIDER_MODULES = ["wenku8.spiders"]
 NEWSPIDER_MODULE = "wenku8.spiders"
 
