@@ -16,3 +16,11 @@ class BookItem(scrapy.Item):
     words: int = scrapy.Field()
     status: str = scrapy.Field()
     tags: list[str] = scrapy.Field()
+
+class TextItem(scrapy.Item):
+    id: int = scrapy.Field()
+    content: bytes = scrapy.Field()
+
+class CoverItem(scrapy.Item):
+    id: int = scrapy.Field()
+    content: bytes = scrapy.Field()

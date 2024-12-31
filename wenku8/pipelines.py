@@ -4,7 +4,7 @@ from scrapy import Spider
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import select, Session
 
-from wenku8.items import BookItem
+from wenku8.items import BookItem, CoverItem, TextItem
 from wenku8.models import *
 
 
@@ -46,3 +46,37 @@ class Database:
             self.session.add(book)
             self.session.commit()
             self.log(f"Book {item['title']} successfully saved", logging.INFO)
+
+class CoverPipeline:
+    def open_spider(self, spider):
+        self.log = spider.log
+        self.session = Session(engine)
+
+    def close_spider(self, spider):
+        self.session.close()
+
+    def process_item(self, item, spider):
+        if isinstance(item, CoverItem):
+            query_book = select(Book).where(Book.query_id == item['id'])
+            book = self.session.exec(query_book).one()
+            cover = Cover(id=book.query_id, content=item['content'])
+            self.session.add(cover)
+            self.session.commit()
+            self.log(f"Cover {item['id']} successfully saved", logging.INFO)
+
+class TextPipeline:
+    def open_spider(self, spider):
+        self.log = spider.log
+        self.session = Session(engine)
+
+    def close_spider(self, spider):
+        self.session.close()
+
+    def process_item(self, item, spider):
+        if isinstance(item, TextItem):
+            query_book = select(Book).where(Book.query_id == item['id'])
+            book = self.session.exec(query_book).one()
+            text = Text(id=book.id, content=item['content'])
+            self.session.add(text)
+            self.session.commit()
+            self.log(f"Text {item['id']} successfully saved", logging.INFO)

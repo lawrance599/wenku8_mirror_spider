@@ -9,7 +9,7 @@ from wenku8.models import *
 
 class WenkuSpider(scrapy.Spider):
     name = "wenku"
-    max_index = 3817
+    max_index = 4
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"

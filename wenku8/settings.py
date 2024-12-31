@@ -9,7 +9,7 @@
 import logging
 
 DOWNLOAD_PATH = '/home/ubuntu/download/wenku8'
-LOG_LEVEL = logging.WARNING
+LOG_LEVEL = logging.INFO
 BOT_NAME = "wenku8"
 
 SPIDER_MODULES = ["wenku8.spiders"]
@@ -67,7 +67,9 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "wenku8.pipelines.Database": 1,
+    # "wenku8.pipelines.Database": 1,
+    "wenku8.pipelines.CoverPipeline": 300,
+    # "wenku8.pipelines.TextPipeline": 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
