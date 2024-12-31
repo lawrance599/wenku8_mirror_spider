@@ -26,3 +26,5 @@ python run.py cover #小说封面爬取
 # todo
 - 最新书目的自动跟进更新
 - 定时更新
+# LICENSE
+本项目遵守MIT LICENSE
