@@ -1,30 +1,22 @@
 import logging
 import re
-from sqlalchemy.exc import NoResultFound
-from sqlmodel import select, Session
 
+from wenku8.dependence import get_max_id_of_book
 from wenku8.items import *
-from wenku8.models import *
 
 
 class WenkuSpider(scrapy.Spider):
-    name = "wenku"
-    max_index = 4
+    name = "book"
+    max_index = 3740
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
         cookie = {
             "Cookie": "jieqiUserCharset=utf-8;"
         }
-        with Session(engine) as session:
-            try:
-                books: list[Book] = session.exec(select(Book).where(Book.title is not None)).all()
-                last_query_id = max(books, key=lambda x: x.query_id).query_id+1 if books else 1
-            except NoResultFound:
-                self.log("No Book in the tabel", logging.INFO)
-                last_query_id = 1
-        self.log(f"start from {last_query_id}", logging.WARNING)
-        for index in range(last_query_id, self.max_index + 1):
+        max_id = get_max_id_of_book()
+        self.log(f"start from {max_id + 1}", logging.WARNING)
+        for index in range(max_id + 1, self.max_index + 1):
             request = scrapy.Request(
                 root_url + str(index) + ".htm",
                 callback=self.parse,
@@ -90,4 +82,5 @@ class WenkuSpider(scrapy.Spider):
                     self.log(f"Pattern {pattern} cant match {value}", logging.ERROR)
             else:
                 return value
+
         return inner

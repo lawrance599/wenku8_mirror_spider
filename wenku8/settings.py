@@ -7,11 +7,15 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import logging
+import os
+from datetime import datetime
 
-DOWNLOAD_PATH = '/home/ubuntu/download/wenku8'
 LOG_LEVEL = logging.INFO
 BOT_NAME = "wenku8"
-
+today = datetime.now()
+LOG_FILE = f"./log/{today.year}.{today.month}.{today.day}.log"
+if not os.path.exists(LOG_FILE):
+    os.makedirs(LOG_FILE)
 SPIDER_MODULES = ["wenku8.spiders"]
 NEWSPIDER_MODULE = "wenku8.spiders"
 
@@ -67,9 +71,9 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # "wenku8.pipelines.Database": 1,
-    "wenku8.pipelines.CoverPipeline": 300,
-    # "wenku8.pipelines.TextPipeline": 200,
+    "wenku8.pipelines.Database": 100,
+    "wenku8.pipelines.CoverPipeline": 200,
+    "wenku8.pipelines.TextPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
