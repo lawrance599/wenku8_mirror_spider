@@ -40,7 +40,7 @@ class Text(SQLModel, table=True):
     content: bytes = Field(default=None, sa_type=LargeBinary(65536))
 
 
-__engine_url = None  # todo
+__engine_url = None
 if __engine_url is None:
     raise Exception("Please imply the engine url, which is a must to save data"
                     " u can look for https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls "
