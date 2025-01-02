@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import LargeBinary
-from sqlmodel import SQLModel, create_engine, Field, Relationship
+from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
 
 
 class BookTagLink(SQLModel, table=True):
@@ -37,7 +37,7 @@ class Cover(SQLModel, table=True):
 class Text(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     query_id: Optional[int] = Field(default=None, index=True, unique=True)
-    content: bytes = Field(default=None, sa_type=LargeBinary(65536))
+    content: bytes = Field(default=None, sa_type=LargeBinary(16777216))
 
 
 __engine_url = None
@@ -47,3 +47,18 @@ if __engine_url is None:
                     "or https://docs.sqlalchemy.org.cn/en/20/core/engines.html#backend-specific-urls for the chinese translation")
 engine = create_engine(__engine_url)
 SQLModel.metadata.create_all(engine)
+
+
+def get_miss_on_query_id_of(model: SQLModel):
+    with Session(engine) as session:
+        cover_ids = session.exec(select(model.query_id)).all()
+        book_ids = session.exec(select(Book.query_id).where(Book.words != 0)).all()
+        for book_id in book_ids:
+            if book_id not in cover_ids:
+                yield book_id
+
+
+def get_max_query_id_of(model: SQLModel):
+    with Session(engine) as session:
+        query_ids = session.exec(select(model.query_id)).all()
+        return max(query_ids)

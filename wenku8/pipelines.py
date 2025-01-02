@@ -2,7 +2,6 @@ import logging
 
 from scrapy import Spider
 from sqlalchemy.exc import NoResultFound
-from sqlmodel import select, Session
 
 from wenku8.items import BookItem, CoverItem, TextItem
 from wenku8.models import *
@@ -60,9 +59,12 @@ class CoverPipeline:
     def process_item(self, item, spider):
         if isinstance(item, CoverItem):
             cover = Cover(query_id=item["id"], content=item['content'])
-            self.session.add(cover)
-            self.session.commit()
-            self.log(f"Cover {item['id']} successfully saved", logging.INFO)
+            try:
+                self.session.add(cover)
+                self.session.commit()
+                self.log(f"Cover {item['id']} successfully saved", logging.INFO)
+            except Exception as e:
+                self.log(f"Cover {item['id']} failed to save", logging.WARNING)
         return item
 
 
@@ -77,7 +79,10 @@ class TextPipeline:
     def process_item(self, item, spider):
         if isinstance(item, TextItem):
             text = Text(query_id=item['id'], content=item['content'])
-            self.session.add(text)
-            self.session.commit()
-            self.log(f"Text {item['id']} successfully saved", logging.INFO)
+            try:
+                self.session.add(text)
+                self.session.commit()
+                self.log(f"Text {item['id']} successfully saved", logging.INFO)
+            except Exception as e:
+                self.log(f"Text {item['id']} failed to save", logging.WARNING)
         return item

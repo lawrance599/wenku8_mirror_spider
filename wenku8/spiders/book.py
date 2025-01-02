@@ -1,22 +1,23 @@
 import logging
 import re
 
-from wenku8.dependence import get_max_id_of_book
 from wenku8.items import *
+from wenku8.models import Book, get_max_query_id_of
 
 
 class WenkuSpider(scrapy.Spider):
     name = "book"
-    max_index = 3740
+    # 每次向后爬取的次数
+    limit = 10
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
         cookie = {
             "Cookie": "jieqiUserCharset=utf-8;"
         }
-        max_id = get_max_id_of_book()
+        max_id = get_max_query_id_of(Book)
         self.log(f"start from {max_id + 1}", logging.WARNING)
-        for index in range(max_id + 1, self.max_index + 1):
+        for index in range(max_id + 1, self.limit + 1):
             request = scrapy.Request(
                 root_url + str(index) + ".htm",
                 callback=self.parse,
