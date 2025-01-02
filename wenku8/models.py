@@ -57,7 +57,6 @@ def get_miss_on_query_id_of(model: SQLModel):
             if book_id not in cover_ids:
                 yield book_id
 
-
 def get_max_query_id_of(model: SQLModel):
     with Session(engine) as session:
         query_ids = session.exec(select(model.query_id)).all()

@@ -17,7 +17,7 @@ class WenkuSpider(scrapy.Spider):
         }
         max_id = get_max_query_id_of(Book)
         self.log(f"start from {max_id + 1}", logging.WARNING)
-        for index in range(max_id + 1, self.limit + 1):
+        for index in range(max_id + 1, max_id + self.limit + 1):
             request = scrapy.Request(
                 root_url + str(index) + ".htm",
                 callback=self.parse,
