@@ -1,8 +1,11 @@
 from typing import Optional
 
+from dotenv import load_dotenv
 from sqlalchemy import LargeBinary
 from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
 
+load_dotenv(".env")
+from os import getenv
 
 class BookTagLink(SQLModel, table=True):
     book_pk: Optional[int] = Field(default=None, foreign_key="book.id", primary_key=True)
@@ -40,7 +43,7 @@ class Text(SQLModel, table=True):
     content: bytes = Field(default=None, sa_type=LargeBinary(16777216))
 
 
-__engine_url = None
+__engine_url = getenv("database_url".upper())
 if __engine_url is None:
     raise Exception("Please imply the engine url, which is a must to save data"
                     " u can look for https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls "
