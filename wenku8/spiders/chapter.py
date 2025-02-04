@@ -28,7 +28,7 @@ class ChapterSpider(scrapy.Spider):
         )
     def after_login(self, response):
         with Session(engine) as session:
-            book_ids = session.exec(select(Book.query_id)).all()
+            book_ids = session.exec(select(Book.id)).all()
         for book_id in book_ids:
             yield scrapy.Request(
             url=f"https://www.wenku8.net/modules/article/packshow.php?id={book_id}&type=txt",

@@ -4,15 +4,14 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-
+from datetime import date
 
 class BookItem(scrapy.Item):
     id: int = scrapy.Field()
     title: str = scrapy.Field()
     writer: str = scrapy.Field()
     description: str = scrapy.Field()
-    last_chapter: str = scrapy.Field()
-    last_updated: str = scrapy.Field()
+    last_updated: date = scrapy.Field()
     words: int = scrapy.Field()
     status: str = scrapy.Field()
     tags: list[str] = scrapy.Field()

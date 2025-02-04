@@ -75,8 +75,8 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "wenku8.pipelines.Database": 100,
-    "wenku8.pipelines.CoverPipeline": 200,
-    "wenku8.pipelines.TextPipeline": 300,
+    # "wenku8.pipelines.CoverPipeline": 200,
+    # "wenku8.pipelines.TextPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

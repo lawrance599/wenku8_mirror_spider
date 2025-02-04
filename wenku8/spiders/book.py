@@ -2,17 +2,18 @@ import logging
 import re
 from datetime import date
 from wenku8.items import *
-from wenku8.models import Book, get_max_query_id_of
+from wenku8.models import Book
+from wenku8.util import get_max_id_of
 
 
 class WenkuSpider(scrapy.Spider):
     name = "book"
     # 每次向后爬取的次数
-    limit = 1000
+    limit = 3000
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
-        max_id = get_max_query_id_of(Book)
+        max_id = get_max_id_of(Book) if get_max_id_of(Book) is not None else 0
         for index in range(max_id + 1, max_id + self.limit + 1):
             yield scrapy.Request(
                 root_url + str(index) + ".htm",
@@ -27,7 +28,7 @@ class WenkuSpider(scrapy.Spider):
             '//table[1]//tr[2]/td[2]/text()',
             r"小说作者：((.*){1,})",
         )
-        
+
         normal_desc = response.xpath('//div[@id="content"]//table[2]//tr/td[2]/span[6]/text()').extract_first()
         if normal_desc is None:
             description = response.xpath("//div[@id='content']//table[2]//tr/td[2]/span[4]/text()").extract_first()
@@ -38,7 +39,7 @@ class WenkuSpider(scrapy.Spider):
             '//table[1]//tr[2]/td[4]/text()',
             r"最后更新：((.*){1,})",
         )
-        last_updated = date.fromisoformat(last_updated)
+        last_updated = date.fromisoformat(last_updated) if last_updated is not None else None
         
         words = res(
             '//table[1]//tr[2]/td[5]/text()',

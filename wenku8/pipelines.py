@@ -3,11 +3,11 @@ import logging
 from scrapy import Spider
 from sqlalchemy.exc import NoResultFound
 
-from wenku8.items import BookItem, CoverItem, TextItem
+from wenku8.items import BookItem, CoverItem
 from wenku8.models import *
 
 
-class Database:
+class BookPipeline:
     def open_spider(self, spider: Spider):
         self.log = spider.log
         self.session = Session(engine)
@@ -55,13 +55,11 @@ class Database:
                 tags[index] = result
 
             # 创建书籍对象并保存到数据库
-            book = Book(  
-                tags=tags,
-                **item,
-            )
+            item['tags'] = tags
+            book = Book(**item)
             self.session.add(book)
             self.session.commit()
-            self.log(f"书籍 {item['title']} 成功保存", logging.INFO)
+            self.log(f"《{item['title']}》 成功保存", logging.INFO)
 
         return item
 
