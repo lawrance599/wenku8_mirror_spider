@@ -42,6 +42,12 @@ class Text(SQLModel, table=True):
     query_id: Optional[int] = Field(default=None, index=True, unique=True)
     content: bytes = Field(default=None, sa_type=LargeBinary(16777216))
 
+class Chapter(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    book_id: Optional[int] = Field(default=None, foreign_key="book.id")
+    title: Optional[str] = Field(default=None)
+    serial: Optional[int] = Field(default=None)
+    content: bytes = Field(default=None, sa_type=LargeBinary(16777216))
 
 __engine_url = getenv("database_url".upper(), None)
 if __engine_url is None:

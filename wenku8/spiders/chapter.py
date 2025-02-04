@@ -43,20 +43,20 @@ class ChapterSpider(scrapy.Spider):
         :type response: scrapy.http.Response
         """
         # 定义章节链接的正则表达式模式
-        link_pattern: str = r"https://dl.wenku8.com/packtxt.php\?aid=([0-9]{1,})&vid=([0-9]{1,})&charset=utf-8"
+        link_pattern: str = r"https://dl.wenku8.com/packtxt.php\?aid=([0-9]+)&vid=([0-9]+)&charset=utf-8"
         
         # 提取网页中所有<a>标签的href属性值，即原始链接列表
-        raw_links: list = response.xpath('//a/@href').all()
+        raw_links: list = response.xpath('//a/@href').getall()
         
         # 过滤并保留匹配link_pattern的链接，即章节链接
-        chapter_links = filter(lambda x: re.match(link_pattern, x), raw_links)
+        chapter_links = filter(lambda x: bool(re.match(link_pattern, x)), raw_links)
         
         # 提取网页中所有章节名称，假设章节名称位于特定<td>标签内
-        chapter_names = response.xpath("//td[@class='odd']/text()").all()
+        chapter_names = response.xpath("//td[@class='odd']/text()").getall()
         
         # 遍历章节名称和链接，生成新的请求以下载章节内容
         try:
-            for name, link in zip(chapter_names, chapter_links):
+            for serial, (name, link) in enumerate(zip(chapter_names, chapter_links)):
                 # 从链接中提取书ID和章节ID
                 book_id, chapter_id = extract_id(link, link_pattern)
                 
@@ -67,7 +67,8 @@ class ChapterSpider(scrapy.Spider):
                     meta={
                         "book_id": book_id,
                         "chapter_id": chapter_id,
-                        "chapter_name": name
+                        "chapter_name": name,
+                        "serial": serial,
                     }
                 )
         except ValueError:
@@ -76,15 +77,34 @@ class ChapterSpider(scrapy.Spider):
             sys.exit(1)
 
     def download_chapter(self, response):
+        """
+        处理下载章节的响应，提取并生成章节信息。
+    
+        该函数从响应中提取书籍ID、章节ID和章节名称，并结合响应内容生成ChapterItem对象。
+        这是一个处理下载章节逻辑的函数，将网络响应数据转换为章节信息，以便进一步处理或存储。
+    
+        参数:
+        - response: 包含章节内容的响应对象，其meta属性中包含书籍和章节的元信息。
+    
+        返回:
+        - ChapterItem: 一个生成的ChapterItem对象，包含书籍ID、章节ID、章节标题和内容。
+        """
+        # 提取响应中的书籍ID、章节ID和章节名称
         book_id = response.meta["book_id"]
         chapter_id = response.meta["chapter_id"]
         chapter_name = response.meta["chapter_name"]
+        serial = response.meta["serial"]
+    
+        # 生成并返回一个ChapterItem对象，包含书籍信息和章节内容
         yield ChapterItem(
             book_id=book_id,
             id=chapter_id,
             title=chapter_name,
-            content=response.body
+            content=response.body,
+            serial=serial,
         )
-    
+
+
 def extract_id(link: str, link_pattern: str):
-        return re.match(link_pattern, link).groups(1), re.match(link_pattern, link).groups(2)
+        matchs =  re.match(link_pattern, link).groups()
+        return matchs[0], matchs[1]

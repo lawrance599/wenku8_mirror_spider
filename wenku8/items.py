@@ -31,4 +31,5 @@ class ChapterItem(scrapy.Item):
     id: int = scrapy.Field()
     book_id: int = scrapy.Field()
     title: str = scrapy.Field()
+    serial: int = scrapy.Field()
     content: bytes = scrapy.Field()
