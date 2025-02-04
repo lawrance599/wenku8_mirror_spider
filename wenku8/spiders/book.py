@@ -1,6 +1,6 @@
 import logging
 import re
-
+from datetime import date
 from wenku8.items import *
 from wenku8.models import Book, get_max_query_id_of
 
@@ -8,41 +8,38 @@ from wenku8.models import Book, get_max_query_id_of
 class WenkuSpider(scrapy.Spider):
     name = "book"
     # 每次向后爬取的次数
-    limit = 10
+    limit = 1000
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
-        cookie = {
-            "Cookie": "jieqiUserCharset=utf-8;"
-        }
         max_id = get_max_query_id_of(Book)
-        self.log(f"start from {max_id + 1}", logging.WARNING)
         for index in range(max_id + 1, max_id + self.limit + 1):
-            request = scrapy.Request(
+            yield scrapy.Request(
                 root_url + str(index) + ".htm",
                 callback=self.parse,
-                cb_kwargs={"query_id": index},
-                cookies=cookie,
+                cb_kwargs={"id": index},
             )
-            yield request
 
-    def parse(self, response, query_id: int):
+    def parse(self, response, id: int):
         res = self.re_first(response)
         title = res('//table[1]//span/b/text()')
         writer = res(
             '//table[1]//tr[2]/td[2]/text()',
             r"小说作者：((.*){1,})",
         )
+        
         normal_desc = response.xpath('//div[@id="content"]//table[2]//tr/td[2]/span[6]/text()').extract_first()
         if normal_desc is None:
             description = response.xpath("//div[@id='content']//table[2]//tr/td[2]/span[4]/text()").extract_first()
         else:
             description = normal_desc
-        last_chapter = res('//div[@id="content"]//table[2]//tr//span[4]/a/text()')
+        
         last_updated = res(
             '//table[1]//tr[2]/td[4]/text()',
             r"最后更新：((.*){1,})",
         )
+        last_updated = date.fromisoformat(last_updated)
+        
         words = res(
             '//table[1]//tr[2]/td[5]/text()',
             r"全文长度：((.*){1,})字",
@@ -60,11 +57,10 @@ class WenkuSpider(scrapy.Spider):
         else:
             tags = tags.strip().split(" ")
         yield BookItem(
-            query_id=query_id,
+            id=id,
             title=title,
             writer=writer,
             description=description,
-            last_chapter=last_chapter,
             last_updated=last_updated,
             words=words,
             status=status,

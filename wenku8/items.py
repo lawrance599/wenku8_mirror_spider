@@ -7,7 +7,7 @@ import scrapy
 
 
 class BookItem(scrapy.Item):
-    query_id: int = scrapy.Field()
+    id: int = scrapy.Field()
     title: str = scrapy.Field()
     writer: str = scrapy.Field()
     description: str = scrapy.Field()
@@ -16,11 +16,6 @@ class BookItem(scrapy.Item):
     words: int = scrapy.Field()
     status: str = scrapy.Field()
     tags: list[str] = scrapy.Field()
-
-
-class TextItem(scrapy.Item):
-    id: int = scrapy.Field()
-    content: bytes = scrapy.Field()
 
 
 class CoverItem(scrapy.Item):

@@ -36,7 +36,7 @@ class Database:
         if isinstance(item, BookItem):
             # 检查书籍标题是否存在
             if item['title'] is None:
-                self.log(f"query_id {item['query_id']} 不存在！", logging.WARNING)
+                self.log(f"id {item['id']} 不存在！", logging.WARNING)
                 return None
 
             # 初始化标签列表
@@ -55,16 +55,9 @@ class Database:
                 tags[index] = result
 
             # 创建书籍对象并保存到数据库
-            book = Book(
-                query_id=item['query_id'],
-                title=item['title'],
-                writer=item['writer'],
-                description=item['description'],
-                last_chapter=item['last_chapter'],
-                last_updated=item['last_updated'],
-                words=item['words'],
-                status=item['status'],
+            book = Book(  
                 tags=tags,
+                **item,
             )
             self.session.add(book)
             self.session.commit()
@@ -98,7 +91,7 @@ class CoverPipeline:
         # 检查项目是否为 CoverItem 实例
         if isinstance(item, CoverItem):
             # 根据项目创建 Cover 对象
-            cover = Cover(query_id=item["id"], content=item['content'])
+            cover = Cover(id=item["id"], content=item['content'])
             try:
                 # 将 Cover 对象添加到会话并提交到数据库
                 self.session.add(cover)
@@ -111,45 +104,6 @@ class CoverPipeline:
         # 返回处理后的项目
         return item
 
-
-class TextPipeline:
-    def open_spider(self, spider):
-        self.log = spider.log
-        self.session = Session(engine)
-
-    def close_spider(self, spider):
-        self.session.close()
-
-    def process_item(self, item, spider):
-        """
-        处理爬取到的项目。
-
-        该方法用于处理由蜘蛛（spider）爬取到的每个项目。如果项目是 TextItem 的实例，
-        则尝试将其内容保存到数据库中。成功保存时记录日志信息，若保存失败则记录警告信息。
-
-        参数:
-        - item: 爬取到的项目，可能是 TextItem 的实例。
-        - spider: 爬取该项目的蜘蛛（spider）。
-
-        返回值:
-        - item: 返回处理后的项目。
-        """
-
-        # 检查项目是否为 TextItem 实例，并创建对应的文本对象
-        if isinstance(item, TextItem):
-            text = Text(query_id=item['id'], content=item['content'])
-
-            # 尝试将文本对象添加到数据库会话并提交
-            try:
-                self.session.add(text)
-                self.session.commit()
-                self.log(f"Text {item['id']} successfully saved", logging.INFO)
-
-            # 捕获异常并记录警告信息
-            except Exception as e:
-                self.log(f"Text {item['id']} failed to save", logging.WARNING)
-
-        return item
 
 class ChapterPipeline:
     def open_spider(self, spider):
