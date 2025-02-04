@@ -26,3 +26,9 @@ class TextItem(scrapy.Item):
 class CoverItem(scrapy.Item):
     id: int = scrapy.Field()
     content: bytes = scrapy.Field()
+
+class ChapterItem(scrapy.Item):
+    id: int = scrapy.Field()
+    book_id: int = scrapy.Field()
+    title: str = scrapy.Field()
+    content: bytes = scrapy.Field()

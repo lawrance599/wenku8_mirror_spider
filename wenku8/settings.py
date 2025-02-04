@@ -15,7 +15,7 @@ BOT_NAME = "wenku8"
 # log settings
 today = datetime.now()
 LOG_LEVEL = logging.INFO
-LOG_FILE = f"./log/{today.year}.{today.month}.{today.day}.log"
+# LOG_FILE = f"./log/{today.year}.{today.month}.{today.day}.log"
 if not os.path.exists("./log"):
     os.mkdir("./log")
 
