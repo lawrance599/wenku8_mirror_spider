@@ -10,6 +10,11 @@ class WenkuSpider(scrapy.Spider):
     name = "book"
     # 每次向后爬取的次数
     limit = 3000
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "wenku8.pipelines.BookPipeline": 300,
+        }
+    }
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
@@ -57,16 +62,18 @@ class WenkuSpider(scrapy.Spider):
             self.log(f"book {title} has no tags", logging.WARNING)
         else:
             tags = tags.strip().split(" ")
-        yield BookItem(
-            id=id,
-            title=title,
-            writer=writer,
-            description=description,
-            last_updated=last_updated,
-            words=words,
-            status=status,
-            tags=tags,
-        )
+        
+        if title is not None :
+            yield BookItem(
+                id=id,
+                title=title,
+                writer=writer,
+                description=description,
+                last_updated=last_updated,
+                words=words,
+                status=status,
+                tags=tags,
+            )
 
     def re_first(self, res):
         res = res

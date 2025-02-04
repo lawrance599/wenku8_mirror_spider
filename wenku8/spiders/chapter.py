@@ -8,6 +8,11 @@ import sys
 
 class ChapterSpider(scrapy.Spider):
     name="chapter"
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "wenku8.pipelines.ChapterPipeline": 300,
+        }
+    }
     def start_requests(self):
         """
         发送登录请求。
@@ -28,7 +33,7 @@ class ChapterSpider(scrapy.Spider):
         )
     def after_login(self, response):
         with Session(engine) as session:
-            book_ids = session.exec(select(Book.id)).all()
+            book_ids = session.exec(select(Book.id).where(Book.words!=0)).all()
         for book_id in book_ids:
             yield scrapy.Request(
             url=f"https://www.wenku8.net/modules/article/packshow.php?id={book_id}&type=txt",
