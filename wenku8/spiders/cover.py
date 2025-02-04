@@ -5,7 +5,9 @@ class CoverSpider(spiders.Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "wenku8.pipelines.CoverPipeline": 300,
-        }
+        },
+        "CONCURRENT_REQUESTS": 16,
+        "DOWNLOAD_DELAY": 4,
     }
     def start_requests(self):
         for id in get_cover_id():

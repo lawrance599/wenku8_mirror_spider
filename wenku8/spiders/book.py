@@ -13,7 +13,9 @@ class WenkuSpider(scrapy.Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "wenku8.pipelines.BookPipeline": 300,
-        }
+        },
+        "CONCURRENT_REQUESTS": 16,
+        "DOWNLOAD_DELAY": 0.5,
     }
 
     def start_requests(self):
@@ -58,12 +60,7 @@ class WenkuSpider(scrapy.Spider):
             '//div[@id="content"]//table[2]//tr/td[2]/span[1]//text()',
             r"作品Tags：((.*){1,})",
         )
-        if tags is None:
-            self.log(f"book {title} has no tags", logging.WARNING)
-        else:
-            tags = tags.strip().split(" ")
-        
-        if title is not None :
+        if title and tags and writer :
             yield BookItem(
                 id=id,
                 title=title,
@@ -72,8 +69,9 @@ class WenkuSpider(scrapy.Spider):
                 last_updated=last_updated,
                 words=words,
                 status=status,
-                tags=tags,
+                tags=tags.strip().split(" "),
             )
+        yield None
 
     def re_first(self, res):
         res = res

@@ -11,7 +11,9 @@ class ChapterSpider(scrapy.Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "wenku8.pipelines.ChapterPipeline": 300,
-        }
+        },
+        "CONCURRENT_REQUESTS": 8,
+        "DOWNLOAD_DELAY": 2,
     }
     def start_requests(self):
         """
