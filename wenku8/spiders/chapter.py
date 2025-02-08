@@ -25,8 +25,8 @@ class ChapterSpider(scrapy.Spider):
         yield scrapy.FormRequest(
             url="https://www.wenku8.net/login.php?do=submit",
             formdata={
-                "username": "zlawrance",
-                "password": "13767631251Fan!",
+                "username": "",# todo
+                "password": "",# todo
                 "usecookie":"315360000",
                 "action": "login",
                 "submit": " 登  录 "
