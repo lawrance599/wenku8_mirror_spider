@@ -1,7 +1,7 @@
-import scrapy.linkextractors
-from wenku8.models import engine, Book
+from wenku8.models import engine, Book, Chapter
 import scrapy
 from sqlmodel import Session, select
+from sqlalchemy.exc import NoResultFound
 import re
 from wenku8.items import ChapterItem
 import sys
@@ -62,11 +62,16 @@ class ChapterSpider(scrapy.Spider):
         chapter_names = response.xpath("//td[@class='odd']/text()").getall()
         
         # 遍历章节名称和链接，生成新的请求以下载章节内容
-        try:
-            for serial, (name, link) in enumerate(zip(chapter_names, chapter_links)):
+        with Session(engine) as session:
+            for serial, (name, link) in enumerate(zip(chapter_names, chapter_links)):                
                 # 从链接中提取书ID和章节ID
                 book_id, chapter_id = extract_id(link, link_pattern)
-                
+
+                try:
+                    session.exec(select(Chapter.id).where(Chapter.id == chapter_id)).one()
+                    continue
+                except NoResultFound as e:
+                    pass
                 # 发起请求，传递额外的元数据用于后续处理
                 yield scrapy.Request(
                     url=link,
@@ -78,10 +83,6 @@ class ChapterSpider(scrapy.Spider):
                         "serial": serial,
                     }
                 )
-        except ValueError:
-            # 如果章节链接和名称的数量不匹配，记录错误并退出
-            self.log("链接长度和章节名字不同", 50)
-            sys.exit(1)
 
     def download_chapter(self, response):
         """

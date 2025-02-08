@@ -3,7 +3,7 @@ from datetime import date
 from dotenv import load_dotenv
 from sqlalchemy import LargeBinary
 from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
-from sqlalchemy import String
+from sqlalchemy import String, Index
 
 load_dotenv(".env")
 from os import getenv
@@ -14,6 +14,9 @@ class BookTagLink(SQLModel, table=True):
 
 
 class Book(SQLModel, table=True):
+    __table_args__ = (
+            Index('idx_fulltext', 'title', 'description', 'writer', mysql_prefix='FULLTEXT'),
+        )
     id: Optional[int] = Field(default=None, primary_key=True)
     title: Optional[str] = Field(default=None, unique=True)
     writer: Optional[str] = Field(default=None)

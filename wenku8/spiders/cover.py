@@ -6,8 +6,8 @@ class CoverSpider(spiders.Spider):
         "ITEM_PIPELINES": {
             "wenku8.pipelines.CoverPipeline": 300,
         },
-        "CONCURRENT_REQUESTS": 16,
-        "DOWNLOAD_DELAY": 4,
+        "CONCURRENT_REQUESTS": 4,
+        "DOWNLOAD_DELAY": 1,
     }
     def start_requests(self):
         for id in get_cover_id():
@@ -62,10 +62,13 @@ class CoverSpider(spiders.Spider):
             self.log(f"《{book.title}》不存在可用封面")
 def get_cover_id():
     from wenku8.models import Cover, Book, engine
-    from sqlmodel import Session, select
+    from sqlmodel import Session, select, and_
     with Session(engine) as session:
-        statement = select(Book.id).where(Book.has_cover == True)
-        book_ids = session.exec(statement).all()
-        
-        statement = select(Cover.id).where(Cover.id.not_in(book_ids))
+        cover_ids = session.exec(select(Cover.id)).all()
+        statement = select(Book.id).where(
+            and_(
+            Book.id.not_in(cover_ids),
+            Book.has_cover == True
+            )
+        )
         return session.exec(statement).all()

@@ -95,10 +95,10 @@ class CoverPipeline:
                 self.session.add(cover)
                 self.session.commit()
                 # 记录成功保存的日志信息
-                self.log(f"Cover {item['id']} 成功保存", logging.INFO)
+                self.log(f"{item['id']} 封面成功保存", logging.INFO)
             except Exception as e:
                 # 如果发生异常，记录保存失败的日志警告
-                self.log(f"Cover {item['id']} 保存失败", logging.WARNING)
+                self.log(f"{item['id']} 封面保存失败", logging.WARNING)
         # 返回处理后的项目
         return item
 
