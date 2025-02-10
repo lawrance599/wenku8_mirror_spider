@@ -9,7 +9,7 @@ from wenku8.util import get_max_id_of
 class WenkuSpider(scrapy.Spider):
     name = "book"
     # 每次向后爬取的次数
-    limit = 10
+    limit = 3000
     custom_settings = {
         "ITEM_PIPELINES": {
             "wenku8.pipelines.BookPipeline": 300,

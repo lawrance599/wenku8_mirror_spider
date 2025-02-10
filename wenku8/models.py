@@ -3,7 +3,7 @@ from datetime import date
 from dotenv import load_dotenv
 from sqlalchemy import LargeBinary
 from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
-from sqlalchemy import String, Index
+from sqlalchemy import  Index, Text
 
 load_dotenv(".env")
 from os import getenv
@@ -20,7 +20,7 @@ class Book(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     title: Optional[str] = Field(default=None, unique=True)
     writer: Optional[str] = Field(default=None)
-    description: Optional[str] = Field(default=None, sa_column=String(1024))
+    description: Optional[str] = Field(default=None, max_length=1024)
     last_updated: Optional[date] = Field(default=None)
     words: Optional[int] = Field(default=0)
     status: Optional[str] = Field(default=None)
