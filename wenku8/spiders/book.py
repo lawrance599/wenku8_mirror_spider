@@ -9,7 +9,7 @@ from wenku8.util import get_max_id_of
 class WenkuSpider(scrapy.Spider):
     name = "book"
     # 每次向后爬取的次数
-    limit = 3000
+    limit = 10
     custom_settings = {
         "ITEM_PIPELINES": {
             "wenku8.pipelines.BookPipeline": 300,
@@ -20,7 +20,8 @@ class WenkuSpider(scrapy.Spider):
 
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
-        max_id = get_max_id_of(Book) if get_max_id_of(Book) is not None else 0
+        max_id = get_max_id_of(Book) or 0
+        self.log(f"Start from id {max_id}", logging.warning)
         for index in range(max_id + 1, max_id + self.limit + 1):
             yield scrapy.Request(
                 root_url + str(index) + ".htm",
@@ -71,7 +72,6 @@ class WenkuSpider(scrapy.Spider):
                 status=status,
                 tags=tags.strip().split(" "),
             )
-        yield None
 
     def re_first(self, res):
         res = res
