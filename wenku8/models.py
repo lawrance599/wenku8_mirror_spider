@@ -1,9 +1,9 @@
 from typing import Optional
 from datetime import date
 from dotenv import load_dotenv
-from sqlalchemy import LargeBinary
+from sqlalchemy import LargeBinary, text
 from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
-from sqlalchemy import  Index, Text
+from sqlalchemy import  Index
 
 load_dotenv(".env")
 from os import getenv
@@ -54,3 +54,21 @@ if __engine_url is None:
                     "or https://docs.sqlalchemy.org.cn/en/20/core/engines.html#backend-specific-urls for the chinese translation")
 engine = create_engine(__engine_url)
 SQLModel.metadata.create_all(engine)
+# 创建一些必要的视图
+def create_chapters_view():
+    with Session(engine) as session:
+        statement = """
+CREATE VIEW IF NOT EXISTS chapters AS
+SELECT
+    book_id AS id,
+    COUNT(*) as chapters
+FROM
+    chapter
+GROUP BY
+    book_id
+ORDER BY
+    book_id;
+        """
+    session.exec(text(statement))
+    session.commit()
+create_chapters_view()

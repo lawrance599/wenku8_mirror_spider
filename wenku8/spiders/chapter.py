@@ -35,7 +35,8 @@ class ChapterSpider(scrapy.Spider):
         )
     def after_login(self, response):
         with Session(engine) as session:
-            book_ids = session.exec(select(Book.id).where(Book.words!=0)).all()
+            book_ids = session.exec(select(Book.id)).all()
+            
         for book_id in book_ids:
             yield scrapy.Request(
             url=f"https://www.wenku8.net/modules/article/packshow.php?id={book_id}&type=txt",
@@ -58,7 +59,7 @@ class ChapterSpider(scrapy.Spider):
         # 过滤并保留匹配link_pattern的链接，即章节链接
         chapter_links = filter(lambda x: bool(re.match(link_pattern, x)), raw_links)
         
-        # 提取网页中所有章节名称，假设章节名称位于特定<td>标签内
+        # 提取网页中所有章节名称
         chapter_names = response.xpath("//td[@class='odd']/text()").getall()
         
         # 遍历章节名称和链接，生成新的请求以下载章节内容
@@ -116,3 +117,18 @@ class ChapterSpider(scrapy.Spider):
 def extract_id(link: str, link_pattern: str):
         matchs =  re.match(link_pattern, link).groups()
         return matchs[0], matchs[1]
+
+def get_download_ids():
+    from sqlalchemy import text
+    with Session(engine) as session:
+        ste = """SELECT id FROM book
+WHERE
+    id NOT IN(
+        SELECT UNIQUE id FROM chapters
+    )
+AND
+    words != 0
+ORDER BY
+    id"""
+    return session.exec(text(ste)).all()
+    
