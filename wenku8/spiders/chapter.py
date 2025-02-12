@@ -35,7 +35,7 @@ class ChapterSpider(scrapy.Spider):
         )
     def after_login(self, response):
         with Session(engine) as session:
-            book_ids = session.exec(select(Book.id)).all()
+            book_ids = get_download_ids()
             
         for book_id in book_ids:
             yield scrapy.Request(
