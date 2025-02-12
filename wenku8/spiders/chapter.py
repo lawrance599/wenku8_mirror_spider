@@ -4,8 +4,7 @@ from sqlmodel import Session, select
 from sqlalchemy.exc import NoResultFound
 import re
 from wenku8.items import ChapterItem
-import sys
-
+from os import getenv
 class ChapterSpider(scrapy.Spider):
     name="chapter"
     custom_settings = {
@@ -22,11 +21,12 @@ class ChapterSpider(scrapy.Spider):
         该方法使用Scrapy框架的FormRequest来发送一个登录请求。请求的URL是登录表单的提交地址，
         包含用户名、密码和其他登录所需的数据。登录成功后，将调用after_login方法处理响应。
         """
+        username, password = getenv("WENKU8USER").split(":")
         yield scrapy.FormRequest(
             url="https://www.wenku8.net/login.php?do=submit",
             formdata={
-                "username": "",# todo
-                "password": "",# todo
+                "username": username,
+                "password": password,
                 "usecookie":"315360000",
                 "action": "login",
                 "submit": " 登  录 "
