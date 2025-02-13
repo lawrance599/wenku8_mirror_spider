@@ -14,9 +14,6 @@ class BookTagLink(SQLModel, table=True):
 
 
 class Book(SQLModel, table=True):
-    __table_args__ = (
-            Index('idx_fulltext', 'title', 'description', 'writer', mysql_prefix='FULLTEXT'),
-        )
     id: Optional[int] = Field(default=None, primary_key=True)
     title: Optional[str] = Field(default=None, unique=True)
     writer: Optional[str] = Field(default=None)
@@ -71,4 +68,21 @@ ORDER BY
         """
     session.exec(text(statement))
     session.commit()
+def add_fulltext_index():
+    check_index_query = """
+    SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS 
+    WHERE table_schema=DATABASE() AND table_name='book' AND index_name='idx_fulltext';
+    """
+    create_index_query = """
+    CREATE FULLTEXT INDEX idx_fulltext
+    ON book (title, writer, description) 
+    WITH PARSER ngram;
+    """
+    with Session(engine) as session:
+        result = session.exec(text(check_index_query)).one()
+        if result.IndexIsThere == 0:
+            session.exec(text(create_index_query))
+            session.commit()
+
+# add_fulltext_index()
 create_chapters_view()
