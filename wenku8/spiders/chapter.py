@@ -12,7 +12,7 @@ class ChapterSpider(scrapy.Spider):
             "wenku8.pipelines.ChapterPipeline": 300,
         },
         "CONCURRENT_REQUESTS": 8,
-        "DOWNLOAD_DELAY": 2,
+        "DOWNLOAD_DELAY": 1,
     }
     def start_requests(self):
         """
@@ -22,6 +22,7 @@ class ChapterSpider(scrapy.Spider):
         包含用户名、密码和其他登录所需的数据。登录成功后，将调用after_login方法处理响应。
         """
         username, password = getenv("WENKU8USER").split(":")
+        print(f"登录用户 {username}, 密码 {password}")
         yield scrapy.FormRequest(
             url="https://www.wenku8.net/login.php?do=submit",
             formdata={
@@ -36,14 +37,14 @@ class ChapterSpider(scrapy.Spider):
     def after_login(self, response):
         with Session(engine) as session:
             book_ids = get_download_ids()
-            
         for book_id in book_ids:
             yield scrapy.Request(
             url=f"https://www.wenku8.net/modules/article/packshow.php?id={book_id}&type=txt",
             callback=self.parse_link,
+            cb_kwargs={"book_id": book_id}
         )
     
-    def parse_link(self, response):
+    def parse_link(self, response, book_id):
         """
         解析响应以获取章节链接和名称，并发起新的请求。
     
@@ -62,17 +63,14 @@ class ChapterSpider(scrapy.Spider):
         # 提取网页中所有章节名称
         chapter_names = response.xpath("//td[@class='odd']/text()").getall()
         
+        self.log(f"{book_id} 共计{len(chapter_names)}章")
+        
         # 遍历章节名称和链接，生成新的请求以下载章节内容
         with Session(engine) as session:
             for serial, (name, link) in enumerate(zip(chapter_names, chapter_links)):                
                 # 从链接中提取书ID和章节ID
                 book_id, chapter_id = extract_id(link, link_pattern)
-
-                try:
-                    session.exec(select(Chapter.id).where(Chapter.id == chapter_id)).one()
-                    continue
-                except NoResultFound as e:
-                    pass
+                
                 # 发起请求，传递额外的元数据用于后续处理
                 yield scrapy.Request(
                     url=link,
@@ -130,5 +128,5 @@ AND
     words != 0
 ORDER BY
     id"""
-    return session.exec(text(ste)).all()
+    return map(lambda x:x[0], session.exec(text(ste)).all())
     
