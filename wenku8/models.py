@@ -2,8 +2,7 @@ from typing import Optional
 from datetime import date
 from dotenv import load_dotenv
 from sqlalchemy import LargeBinary, text
-from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, select
-from sqlalchemy import  Index
+from sqlmodel import SQLModel, create_engine, Field, Relationship, Session, Column, TEXT
 
 load_dotenv(".env")
 from os import getenv
@@ -42,7 +41,7 @@ class Chapter(SQLModel, table=True):
     book_id: Optional[int] = Field(default=None, foreign_key="book.id")
     title: Optional[str] = Field(default=None)
     serial: Optional[int] = Field(default=None)
-    content: bytes = Field(default=None, sa_type=LargeBinary(16777216))
+    content: Optional[str] = Field(default=None, sa_column=Column(TEXT(300000)))
 
 __engine_url = getenv("database_url".upper(), None)
 if __engine_url is None:

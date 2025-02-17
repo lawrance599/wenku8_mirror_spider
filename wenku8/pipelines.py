@@ -3,7 +3,7 @@ import logging
 from scrapy import Spider
 from sqlalchemy.exc import NoResultFound
 
-from wenku8.items import BookItem, CoverItem
+from wenku8.items import BookItem, CoverItem, ChapterItem
 from wenku8.models import *
 
 
@@ -112,14 +112,9 @@ class ChapterPipeline:
         self.session.close()
 
     def process_item(self, item, spider):
-        from wenku8.items import ChapterItem
-        from wenku8.models import Chapter
         if isinstance(item, ChapterItem):
             chapter = Chapter(**item)
-            try:
-                self.session.add(chapter)
-                self.session.commit()
-                self.log(f"章节{item['id']} 成功存入", logging.INFO)
-            except Exception as e:
-                self.log(f"章节{item['id']} 存入失败", logging.WARNING)
+            self.session.add(chapter)
+            self.session.commit()
+            self.log(f"章节{item['id']} 成功存入", logging.INFO)
         return item

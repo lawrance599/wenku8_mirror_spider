@@ -107,7 +107,7 @@ class ChapterSpider(scrapy.Spider):
             book_id=book_id,
             id=chapter_id,
             title=chapter_name,
-            content=response.body,
+            content=response.text,
             serial=serial,
         )
 
