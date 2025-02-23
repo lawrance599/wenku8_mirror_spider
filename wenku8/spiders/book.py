@@ -21,7 +21,7 @@ class WenkuSpider(scrapy.Spider):
     def start_requests(self):
         root_url = "https://www.wenku8.net/book/"
         max_id = get_max_id_of(Book) or 0
-        self.log(f"Start from id {max_id}", logging.warning)
+        self.log(f"Start from id {max_id}", logging.WARNING)
         for index in range(max_id + 1, max_id + self.limit + 1):
             yield scrapy.Request(
                 root_url + str(index) + ".htm",

@@ -5,8 +5,7 @@ from sqlalchemy.exc import NoResultFound
 
 from wenku8.items import BookItem, CoverItem, ChapterItem
 from wenku8.models import *
-
-
+from sqlmodel import select
 class BookPipeline:
     def open_spider(self, spider: Spider):
         self.log = spider.log
