@@ -96,7 +96,7 @@ class MainSpider(scrapy.Spider):
             writer=writer[5:],
             status=status[5:],
             last_updated=last_updated[5:],
-            words=int(words[5:]),
+            words=int(words[5:][:-1]),
             description=description,
             tags=list(tags[7].split(","))
         )
@@ -144,12 +144,18 @@ class MainSpider(scrapy.Spider):
         
         # 查询已经存在的章节并过滤
         with Session(engine) as session:
+            book = session.exec(select(Book).where(Book.id == book_id)).one()
             exists_chapter_ids = session.exec(select(Chapter.id).where(Chapter.book_id == book_id)).all()
-        
-        # 若所有章节已经存在则跳过
-        if len(exists_chapter_ids) == len(chapter_ids):
-            self.log(f"{book_id} 未更新章节", 20)
-            return
+
+            # 若所有章节已经存在则跳过
+            if len(exists_chapter_ids) == len(chapter_ids):
+                self.log(f"{book_id} 未更新新章节", 20)
+                return
+
+            # 若存在新章节,则更新书籍更新信息
+            book.last_updated = date.today()
+            session.commit()
+            
         # 传递未下载的章节
         for serial, cid in enumerate(chapter_ids):
             if cid in exists_chapter_ids:
