@@ -24,10 +24,7 @@ pip install -r requirements.txt
 3. 运行爬虫
 
 ```bash
-cd ..
-python run.py book #小说信息爬取
-python run.py text #小说文本爬取
-python run.py cover #小说封面爬取 
+python run.py
 ```
 
 # <b>注意 ！！！<b>
