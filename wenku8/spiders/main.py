@@ -78,7 +78,7 @@ class MainSpider(scrapy.Spider):
         """
         id = response.meta["id"]
         # 原始数据的提取
-        title = response.css("td td b").get() or None
+        title = response.css("td td b").get()
         writer = response.css("#content > div > table tr+ tr td:nth-child(2)::text").get()
         status = response.css("#content > div > table tr+ tr td:nth-child(3)::text").get()
         last_updated = response.css("#content > div > table tr+ tr td:nth-child(4)::text").get()
@@ -92,13 +92,13 @@ class MainSpider(scrapy.Spider):
         self.log(f"<{id}> 信息已经提取", level=20)
         yield BookItem(
             id=id,
-            title=title,
-            writer=writer[5:],
-            status=status[5:],
-            last_updated=last_updated[5:],
+            title=title.strip(),
+            writer=writer[5:].strip(),
+            status=status[5:].strip(),
+            last_updated=last_updated[5:].strip(),
             words=int(words[5:][:-1]),
-            description=description,
-            tags=list(tags[7].split(","))
+            description=description.strip(),
+            tags=list(tags[7].strip().split(","))
         )
         
         # 下载封面
@@ -127,7 +127,7 @@ class MainSpider(scrapy.Spider):
         处理章节页面，传递章节下载链接
         """
         book_id = response.meta["id"]
-        titles = response.xpath("//td[@class='odd']/text()").getall()
+        titles = map(lambda x: x.strip(), response.xpath("//td[@class='odd']/text()").getall())
         chapter_urls = response.xpath("//td[@class='even'][1]/a[2]/@href").getall()
         
         if chapter_urls is None:
