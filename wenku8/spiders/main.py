@@ -78,18 +78,18 @@ class MainSpider(scrapy.Spider):
         """
         id = response.meta["id"]
         # 原始数据的提取
-        title = response.css("td td b").get()
+        title = response.css("td td b::text").get()
         writer = response.css("#content > div > table tr+ tr td:nth-child(2)::text").get()
         status = response.css("#content > div > table tr+ tr td:nth-child(3)::text").get()
         last_updated = response.css("#content > div > table tr+ tr td:nth-child(4)::text").get()
         words = response.css("#content > div > table tr+ tr td:nth-child(5)::text").get()
-        description = response.css("#content > div > table tr+ tr td:nth-child(6)::text").get()
+        description = response.xpath("//div[@id='content']/div/table[2]//td/span[6]/text()").get()
         tags: str = response.css(".hottext:nth-child(1) b::text").get()
-        if title is None:
-            self.log(f"<{id}> 未搜索到基本信息", level=30)
+        if not (title and writer and status and last_updated and words and description and tags):
+            self.log(f"[new] <{id}> 未搜索到基本信息", level=30)
             return
         # 传递新书信息
-        self.log(f"<{id}> 信息已经提取", level=20)
+        self.log(f"[new] <{id}> 信息已经提取", level=20)
         yield BookItem(
             id=id,
             title=title.strip(),
@@ -110,7 +110,7 @@ class MainSpider(scrapy.Spider):
                 meta={"id": id}
             )
         else:
-            self.log(f"<{id}> 未搜索到封面链接", 20)
+            self.log(f"[new] <{id}> 未搜索到封面链接", 20)
             
             
         chapter_page_url = response.xpath("//div[@id='content']//div[6]//div[1]/a/@href").get()
@@ -121,13 +121,13 @@ class MainSpider(scrapy.Spider):
                 meta={"id": id}
             )
         else:
-            self.log(f"<{id}> 未搜索到章节下载页面链接", 20)
+            self.log(f"[new] <{id}> 未搜索到章节下载页面链接", 20)
     def parse_chapters(self, response):
         """
         处理章节页面，传递章节下载链接
         """
         book_id = response.meta["id"]
-        titles = map(lambda x: x.strip(), response.xpath("//td[@class='odd']/text()").getall())
+        titles = list(map(lambda x: x.strip(), response.xpath("//td[@class='odd']/text()").getall()))
         chapter_urls = response.xpath("//td[@class='even'][1]/a[2]/@href").getall()
         
         if chapter_urls is None:
@@ -149,7 +149,7 @@ class MainSpider(scrapy.Spider):
 
             # 若所有章节已经存在则跳过
             if len(exists_chapter_ids) == len(chapter_ids):
-                self.log(f"{book_id} 未更新新章节", 20)
+                self.log(f"[update] {book_id} 未更新新章节", 20)
                 return
 
             # 若存在新章节,则更新书籍更新信息
@@ -160,7 +160,7 @@ class MainSpider(scrapy.Spider):
         for serial, cid in enumerate(chapter_ids):
             if cid in exists_chapter_ids:
                 continue
-            self.log(f"<{book_id}> 新增章节: {titles[serial]} ", 20)
+            self.log(f"[update] <{book_id}> 新增章节: {titles[serial]} ", 20)
             yield scrapy.Request(
                 url=f"https://dl.wenku8.com/packtxt.php?aid={book_id}&vid={cid}&charset=utf-8",
                 callback=self.download_chapter,
@@ -178,7 +178,7 @@ class MainSpider(scrapy.Spider):
         id = response.meta["cid"]
         serial = response.meta["serial"]
         title = response.meta["title"]
-        self.log(f"<{book_id}> 章节<{id}>下载完成", 20)
+        self.log(f"[update] <{book_id}> 章节<{id}>下载完成", 20)
         yield ChapterItem(
             id=id,
             book_id=book_id,
