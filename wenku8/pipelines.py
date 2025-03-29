@@ -4,8 +4,11 @@ from scrapy import Spider
 from sqlalchemy.exc import NoResultFound
 
 from wenku8.items import BookItem, CoverItem, ChapterItem
-from wenku8.models import *
+from wenku8.models import engine, Tag, Book, Cover, Chapter
+from sqlmodel import Session
 from sqlmodel import select
+
+
 class BookPipeline:
     def open_spider(self, spider: Spider):
         self.log = spider.log
@@ -34,15 +37,15 @@ class BookPipeline:
         """
         if isinstance(item, BookItem):
             # 检查书籍标题是否存在
-            if item['title'] is None:
+            if item["title"] is None:
                 self.log(f"id {item['id']} 不存在！", logging.WARNING)
                 return None
 
             # 初始化标签列表
-            tags = [None for _ in range(len(item['tags']))]
+            tags = [None for _ in range(len(item["tags"]))]
 
             # 遍历标签，检查或创建标签
-            for index, tag in enumerate(item['tags']):
+            for index, tag in enumerate(item["tags"]):
                 try:
                     result = self.session.exec(select(Tag).where(Tag.name == tag)).one()
                 except NoResultFound:
@@ -54,7 +57,7 @@ class BookPipeline:
                 tags[index] = result
 
             # 创建书籍对象并保存到数据库
-            item['tags'] = tags
+            item["tags"] = tags
             book = Book(**item)
             self.session.add(book)
             self.session.commit()
@@ -88,14 +91,14 @@ class CoverPipeline:
         # 检查项目是否为 CoverItem 实例
         if isinstance(item, CoverItem):
             # 根据项目创建 Cover 对象
-            cover = Cover(id=item["id"], content=item['content'])
+            cover = Cover(id=item["id"], content=item["content"])
             try:
                 # 将 Cover 对象添加到会话并提交到数据库
                 self.session.add(cover)
                 self.session.commit()
                 # 记录成功保存的日志信息
                 self.log(f"{item['id']} 封面成功保存", logging.INFO)
-            except Exception as e:
+            except Exception:
                 # 如果发生异常，记录保存失败的日志警告
                 self.log(f"{item['id']} 封面保存失败", logging.WARNING)
         # 返回处理后的项目

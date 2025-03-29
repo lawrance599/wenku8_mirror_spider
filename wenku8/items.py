@@ -6,6 +6,7 @@
 import scrapy
 from datetime import date
 
+
 class BookItem(scrapy.Item):
     id: int = scrapy.Field()
     title: str = scrapy.Field()
@@ -20,6 +21,7 @@ class BookItem(scrapy.Item):
 class CoverItem(scrapy.Item):
     id: int = scrapy.Field()
     content: bytes = scrapy.Field()
+
 
 class ChapterItem(scrapy.Item):
     id: int = scrapy.Field()
